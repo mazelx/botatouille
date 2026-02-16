@@ -11,6 +11,7 @@ from app.core.constants import (
     DEFAULT_LLM_TEMPERATURE,
     MEAL_PLANNING_SYSTEM_PROMPT,
     OPENROUTER_API_BASE_URL,
+    DEFAULT_LLM_REASONING
 )
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class OpenRouterService:
         model: str = DEFAULT_LLM_MODEL,
         max_tokens: int = DEFAULT_LLM_MAX_TOKENS,
         temperature: float = DEFAULT_LLM_TEMPERATURE,
+        reasoning: bool = DEFAULT_LLM_REASONING,
     ) -> str:
         """
         Send chat completion request to OpenRouter.
@@ -41,6 +43,7 @@ class OpenRouterService:
             model: Model identifier on OpenRouter
             max_tokens: Maximum tokens in response
             temperature: Sampling temperature (0-1)
+            reasoning: Whether to enable reasoning mode
 
         Returns:
             Response text from the model
@@ -59,6 +62,7 @@ class OpenRouterService:
             "messages": messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
+            "reasoning": {"enabled": reasoning},
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:

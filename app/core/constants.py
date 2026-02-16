@@ -7,9 +7,10 @@ WHATSAPP_MESSAGING_PRODUCT = "whatsapp"
 
 # OpenRouter
 OPENROUTER_API_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_LLM_MODEL = "anthropic/claude-3.5-sonnet"
+DEFAULT_LLM_MODEL = "qwen/qwen3.5-plus-02-15"
 DEFAULT_LLM_TEMPERATURE = 0.7
 DEFAULT_LLM_MAX_TOKENS = 1024
+DEFAULT_LLM_REASONING = True
 
 # Message limits
 WHATSAPP_MAX_MESSAGE_LENGTH = 4096
