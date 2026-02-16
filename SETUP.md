@@ -38,7 +38,7 @@ uv run python main.py
 
 In another terminal, test the webhook:
 ```bash
-uv run python test_webhook.py
+uv run python tests/test_webhook.py
 ```
 
 ### 2. Setup ngrok for WhatsApp Testing

@@ -87,6 +87,9 @@ botatouille/
 │   │   └── whatsapp.py      # WhatsApp data models
 │   └── services/
 │       └── __init__.py      # Business logic (LLM, etc.)
+├── tests/
+│   ├── __init__.py
+│   └── test_webhook.py      # Test scripts
 ├── main.py                  # Entry point
 ├── .env                     # Environment variables (not committed)
 ├── .env.example             # Template for environment variables
