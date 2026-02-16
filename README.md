@@ -103,10 +103,10 @@ botatouille/
 - [x] FastAPI project structure with uv
 - [x] Environment setup (.env, python-dotenv)
 - [x] WhatsApp webhook endpoint (verify + message receive)
-- [ ] OpenRouter API integration for basic conversation
-- [ ] Handle text messages and simple responses
+- [x] OpenRouter API integration for basic conversation
+- [x] Handle text messages and intelligent LLM responses
 - [ ] Deploy to Railway
-- [ ] Test with single user
+- [ ] Test with real WhatsApp user (ngrok)
 
 ## API Documentation
 

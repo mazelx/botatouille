@@ -4,6 +4,7 @@ import logging
 from fastapi import APIRouter, Request, Response, Query, HTTPException
 
 from app.core.config import settings
+from app.services.llm import llm_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -83,9 +84,16 @@ async def handle_incoming_message(message: dict, value: dict) -> None:
         text_body = message.get("text", {}).get("body", "")
         logger.info(f"Text message: {text_body}")
 
-        # TODO: Send to LLM for processing
-        # For now, just log it
-        await send_text_message(from_number, f"Echo: {text_body}")
+        try:
+            # Send to LLM for processing
+            ai_response = await llm_service.generate_meal_plan_response(text_body)
+            await send_text_message(from_number, ai_response)
+        except Exception as e:
+            logger.error(f"Error generating LLM response: {e}", exc_info=True)
+            await send_text_message(
+                from_number,
+                "Sorry, I'm having trouble responding right now. Please try again later.",
+            )
 
     # Handle image messages
     elif message_type == "image":
