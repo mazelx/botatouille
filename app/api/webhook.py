@@ -94,6 +94,7 @@ async def handle_incoming_message(message: dict, value: dict) -> None:
         try:
             # Send to LLM for processing
             ai_response = await llm_service.generate_meal_plan_response(text_body)
+            logger.debug(f"AI Response: {ai_response}")
             await send_text_message(from_number, ai_response)
         except Exception as e:
             logger.error(f"Error generating LLM response: {e}", exc_info=True)
