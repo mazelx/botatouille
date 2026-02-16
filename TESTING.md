@@ -1,98 +1,133 @@
 # Testing Guide
 
-## LLM Service Testing
+## Running Tests
+
+### Run all tests
+```bash
+uv run pytest
+```
+
+### Run with verbose output
+```bash
+uv run pytest -v
+```
+
+### Run specific test categories
+```bash
+# Unit tests only (fast, no external dependencies)
+uv run pytest -m unit
+
+# Integration tests only
+uv run pytest -m integration
+
+# Run specific test file
+uv run pytest tests/test_llm_service.py
+```
+
+### Run with coverage
+```bash
+uv run pytest --cov=app --cov-report=html
+```
+
+## Test Structure
+
+### Unit Tests
+- **[tests/test_llm_service.py](tests/test_llm_service.py)**: Tests for LLM service
+  - Mocks all external API calls
+  - Fast execution
+  - Tests error handling and edge cases
+
+### Integration Tests
+- **[tests/test_webhook_api.py](tests/test_webhook_api.py)**: Tests for webhook endpoints
+  - Uses FastAPI TestClient
+  - Mocks LLM and WhatsApp API calls
+  - Tests full request/response flow
+
+## Demo Scripts
+
+For manual testing and demos, see [examples/](examples/):
 
 ### Test LLM service directly
-
 ```bash
-uv run python tests/test_llm.py
+uv run python examples/demo_llm.py
 ```
 
-This tests the OpenRouter integration without WhatsApp dependency.
-
-Expected output:
-- Bot responds to greetings
-- Bot generates meal plans based on preferences
-- Bot suggests recipes
-
-### Test complete webhook flow
-
-1. Start the server:
+### Test webhook locally
 ```bash
+# Terminal 1 - Start server
 uv run python main.py
+
+# Terminal 2 - Send test messages
+uv run python examples/demo_webhook_local.py
 ```
 
-2. In another terminal, send test webhook:
-```bash
-uv run python tests/test_webhook.py
+## Writing New Tests
+
+### Unit Test Template
+```python
+import pytest
+from unittest.mock import AsyncMock, MagicMock
+
+@pytest.mark.unit
+class TestMyFeature:
+    async def test_something(self, mocker):
+        # Arrange
+        mock_service = mocker.patch("app.module.service")
+
+        # Act
+        result = await my_function()
+
+        # Assert
+        assert result == expected
+        mock_service.assert_called_once()
 ```
 
-3. Check logs for LLM response:
-```bash
-tail -f /tmp/botatouille.log
+### Integration Test Template
+```python
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+@pytest.mark.integration
+def test_my_endpoint():
+    client = TestClient(app)
+    response = client.post("/endpoint", json={"data": "value"})
+
+    assert response.status_code == 200
+    assert response.json() == {"expected": "result"}
 ```
 
-## What Works Now
+## Continuous Integration
 
-✅ **LLM Integration**
-- OpenRouter API connected
-- Claude 3.5 Sonnet model responding
-- Context-aware meal planning assistant
-- Friendly conversational tone
+Tests run automatically on:
+- Git pre-commit hooks (if configured)
+- GitHub Actions (if configured)
+- Before Railway deployment (if configured)
 
-✅ **Message Processing**
-- Receives text messages via webhook
-- Sends to LLM for processing
-- Generates intelligent responses
+## Test Coverage
 
-⚠️ **WhatsApp Sending**
-- Will fail in local testing (expected)
-- Requires ngrok + Meta webhook setup for real testing
-- 400 error is normal without live WhatsApp connection
-
-## Next Steps for Real WhatsApp Testing
-
-1. **Start server**:
-   ```bash
-   uv run python main.py
-   ```
-
-2. **Start ngrok tunnel**:
-   ```bash
-   ngrok http 8000
-   ```
-
-3. **Configure Meta Webhook**:
-   - URL: `https://YOUR-NGROK-URL/webhook`
-   - Verify token: from `.env`
-   - Subscribe to: `messages`
-
-4. **Send WhatsApp message**:
-   - Send to your test number
-   - Should receive intelligent AI response
-
-## Example LLM Responses
-
-**User**: "Hello! Can you help me plan meals?"
-
-**Bot**: "Hi there! 👋 I'd love to help you plan your meals!..."
-
-**User**: "I need a meal plan for 3 days, vegetarian only"
-
-**Bot**: "I'll help you create a 3-day vegetarian meal plan! 🌱..."
+Current test coverage:
+- ✅ LLM service (chat completion, error handling, meal plan generation)
+- ✅ Webhook verification
+- ✅ Message handling (text, image, status updates)
+- ✅ Error scenarios (LLM failures, invalid payloads)
 
 ## Troubleshooting
 
-### LLM test fails
-- Check `OPENROUTER_API_KEY` in `.env`
-- Verify API key is valid
-- Check internet connection
+### Tests fail with import errors
+```bash
+# Reinstall dependencies
+uv sync
+```
 
-### Webhook test fails
-- Ensure server is running on port 8000
-- Check if port is already in use: `lsof -i :8000`
+### AsyncIO errors
+Make sure you have `pytest-asyncio` installed:
+```bash
+uv add --dev pytest-asyncio
+```
 
-### Server won't start
-- Check `.env` file exists
-- Verify all required variables are set
-- Check Python version: `python --version` (should be 3.12+)
+### Mocking issues
+Use `pytest-mock` for easier mocking:
+```bash
+uv add --dev pytest-mock
+```
