@@ -105,8 +105,8 @@ botatouille/
 - [x] WhatsApp webhook endpoint (verify + message receive)
 - [x] OpenRouter API integration for basic conversation
 - [x] Handle text messages and intelligent LLM responses
-- [ ] Deploy to Railway
-- [ ] Test with real WhatsApp user (ngrok)
+- [x] Test with real WhatsApp user (ngrok) ✨
+- [ ] Deploy to Railway (optional)
 
 ## API Documentation
 

@@ -22,7 +22,7 @@ async def verify_webhook(
     Meta sends a GET request to verify the webhook URL.
     We must respond with the challenge if the verify token matches.
     """
-    logger.info(f"Webhook verification request: mode={mode}, token={token}")
+    logger.info(f"Webhook verification request: mode={mode}")
 
     if mode == "subscribe" and token == settings.whatsapp_verify_token:
         logger.info("Webhook verified successfully")
