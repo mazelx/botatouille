@@ -1,115 +1,138 @@
-# Botatouille
+# 🤖 Botatouille
 
-WhatsApp conversational agent for meal planning and grocery shopping.
+WhatsApp AI bot for meal planning and grocery shopping powered by Claude 3.5 Sonnet.
 
-## Setup
+[![Railway](https://img.shields.io/badge/Deployed%20on-Railway-blueviolet)](https://botatouille-production.up.railway.app)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.129+-green)](https://fastapi.tiangolo.com/)
 
-### Prerequisites
-- Python 3.12+
-- `uv` package manager
-- Meta WhatsApp Business Account
-- OpenRouter API key
+## ✨ Features
 
-### Installation
+- 🍽️ Generate weekly meal plans
+- 🛒 Create shopping lists from meal plans
+- 📸 Import recipes from photos (coming soon)
+- 💬 Natural language conversations via WhatsApp
+- 🧠 Powered by Claude 3.5 Sonnet via OpenRouter
 
-1. Clone the repository
+## 🚀 Quick Start
+
 ```bash
-git clone <repo-url>
+# Clone and setup
+git clone https://github.com/mazelx/botatouille.git
 cd botatouille
-```
 
-2. Copy environment variables
-```bash
-cp .env.example .env
-```
-
-3. Fill in your `.env` file with your actual credentials:
-- `OPENROUTER_API_KEY`: Your OpenRouter API key
-- `WHATSAPP_VERIFY_TOKEN`: A random token you create for webhook verification
-- `WHATSAPP_ACCESS_TOKEN`: Your Meta WhatsApp access token
-- `WHATSAPP_PHONE_NUMBER_ID`: Your WhatsApp phone number ID
-
-4. Install dependencies
-```bash
+# Install dependencies
 uv sync
-```
 
-## Running Locally
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
 
-### Start the FastAPI server
-
-```bash
+# Run locally
 uv run python main.py
 ```
 
-The server will start on `http://localhost:8000`
+Server runs on `http://localhost:8000`
 
-### Test endpoints
+## 📚 Documentation
 
-- Health check: `http://localhost:8000/health`
-- Root: `http://localhost:8000/`
-- Webhook (for verification): `http://localhost:8000/webhook`
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide (Railway, ngrok)
+- **[TESTING.md](TESTING.md)** - Testing locally without WhatsApp
+- **[docs/](docs/)** - Additional documentation and guides
+- **[CLAUDE.md](CLAUDE.md)** - Project context and roadmap
 
-## Testing with ngrok
+## 🛠️ Tech Stack
 
-To test WhatsApp webhook locally, you need to expose your local server to the internet:
+- **Backend**: FastAPI + Python 3.13
+- **LLM**: Claude 3.5 Sonnet (via OpenRouter)
+- **Messaging**: Meta WhatsApp Cloud API
+- **Deployment**: Railway
+- **Package Manager**: uv
 
-1. Install ngrok: https://ngrok.com/download
-
-2. Start ngrok tunnel:
-```bash
-ngrok http 8000
-```
-
-3. Copy the HTTPS URL (e.g., `https://abc123.ngrok.io`)
-
-4. Configure Meta WhatsApp webhook:
-   - Go to your Meta App > WhatsApp > Configuration
-   - Webhook URL: `https://abc123.ngrok.io/webhook`
-   - Verify token: Use the value from `WHATSAPP_VERIFY_TOKEN` in your `.env`
-   - Subscribe to webhook fields: `messages`
-
-## Project Structure
+## 📦 Project Structure
 
 ```
 botatouille/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py              # FastAPI app
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── webhook.py       # WhatsApp webhook endpoints
-│   ├── core/
-│   │   ├── __init__.py
-│   │   └── config.py        # Settings and configuration
-│   ├── models/
-│   │   ├── __init__.py
-│   │   └── whatsapp.py      # WhatsApp data models
-│   └── services/
-│       └── __init__.py      # Business logic (LLM, etc.)
-├── tests/
-│   ├── __init__.py
-│   └── test_webhook.py      # Test scripts
-├── main.py                  # Entry point
-├── .env                     # Environment variables (not committed)
-├── .env.example             # Template for environment variables
-├── pyproject.toml           # uv/Python dependencies
-└── README.md
+│   ├── api/          # API routes (webhook)
+│   ├── core/         # Config and constants
+│   ├── models/       # Data models
+│   └── services/     # Business logic (LLM)
+├── tests/            # Test scripts
+├── docs/             # Documentation
+└── main.py           # Entry point
 ```
 
-## Development
+## 🔧 Configuration
 
-### Week 1 MVP Checklist
-- [x] FastAPI project structure with uv
-- [x] Environment setup (.env, python-dotenv)
-- [x] WhatsApp webhook endpoint (verify + message receive)
-- [x] OpenRouter API integration for basic conversation
-- [x] Handle text messages and intelligent LLM responses
-- [x] Test with real WhatsApp user (ngrok) ✨
-- [ ] Deploy to Railway (optional)
+Required environment variables:
 
-## API Documentation
+```bash
+OPENROUTER_API_KEY=       # Your OpenRouter API key
+WHATSAPP_VERIFY_TOKEN=    # Random token for webhook verification
+WHATSAPP_ACCESS_TOKEN=    # Meta WhatsApp access token
+WHATSAPP_PHONE_NUMBER_ID= # Your WhatsApp phone number ID
+```
 
-Once the server is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+See [.env.example](.env.example) for all options.
+
+## 🌐 Live Deployment
+
+The bot is live at: **https://botatouille-production.up.railway.app**
+
+- Status: ✅ Running
+- Hosting: Railway
+- Auto-deploy: Enabled (on push to main)
+
+## 📝 Development Status
+
+### ✅ Week 1 - MVP Complete
+- [x] FastAPI backend
+- [x] WhatsApp webhook integration
+- [x] LLM conversations (OpenRouter + Claude)
+- [x] Deployed to Railway
+- [x] Tested with real WhatsApp messages
+
+### 🔮 Roadmap
+- [ ] **Week 2**: Vision features (recipe photos, shopping tickets)
+- [ ] **Week 3**: Database persistence (PostgreSQL)
+- [ ] **Week 4**: Advanced features (shopping lists, tool use)
+
+## 🧪 Testing
+
+```bash
+# Test LLM service
+uv run python tests/test_llm.py
+
+# Test webhook locally
+uv run python tests/test_webhook.py
+```
+
+See [TESTING.md](TESTING.md) for details.
+
+## 📊 API Endpoints
+
+- `GET /` - Root endpoint
+- `GET /health` - Health check
+- `GET /webhook` - WhatsApp webhook verification
+- `POST /webhook` - Receive WhatsApp messages
+
+API docs: `http://localhost:8000/docs`
+
+## 🤝 Contributing
+
+This is a personal project but contributions are welcome!
+
+## 📄 License
+
+MIT
+
+## 🔗 Links
+
+- **GitHub**: https://github.com/mazelx/botatouille
+- **Railway**: https://railway.app/project/5f6538c3-0e39-4497-8bcd-71bae59c9a82
+- **Meta Dashboard**: https://developers.facebook.com/apps/
+
+---
+
+Made with ❤️ using FastAPI, Claude, and WhatsApp

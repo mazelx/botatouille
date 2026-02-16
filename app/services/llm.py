@@ -1,11 +1,17 @@
 """OpenRouter LLM service for conversational AI."""
 
 import logging
-from typing import Any
 
 import httpx
 
 from app.core.config import settings
+from app.core.constants import (
+    DEFAULT_LLM_MAX_TOKENS,
+    DEFAULT_LLM_MODEL,
+    DEFAULT_LLM_TEMPERATURE,
+    MEAL_PLANNING_SYSTEM_PROMPT,
+    OPENROUTER_API_BASE_URL,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,16 +22,16 @@ class OpenRouterService:
     def __init__(self) -> None:
         """Initialize OpenRouter service."""
         self.api_key = settings.openrouter_api_key
-        self.base_url = "https://openrouter.ai/api/v1"
+        self.base_url = OPENROUTER_API_BASE_URL
         self.app_name = settings.openrouter_app_name
         self.site_url = settings.openrouter_site_url
 
     async def chat_completion(
         self,
         messages: list[dict[str, str]],
-        model: str = "anthropic/claude-3.5-sonnet",
-        max_tokens: int = 1024,
-        temperature: float = 0.7,
+        model: str = DEFAULT_LLM_MODEL,
+        max_tokens: int = DEFAULT_LLM_MAX_TOKENS,
+        temperature: float = DEFAULT_LLM_TEMPERATURE,
     ) -> str:
         """
         Send chat completion request to OpenRouter.
@@ -86,21 +92,8 @@ class OpenRouterService:
         Returns:
             AI-generated response
         """
-        system_prompt = """You are Botatouille, a friendly meal planning assistant on WhatsApp.
-
-Your role is to help users:
-- Plan weekly menus
-- Generate shopping lists
-- Save and organize recipes
-- Manage dietary preferences and restrictions
-
-Keep responses concise and friendly (WhatsApp style).
-Use emojis sparingly and appropriately.
-When suggesting meal plans, format them clearly with days and meal types.
-"""
-
         messages = [
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": MEAL_PLANNING_SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
         ]
 

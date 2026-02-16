@@ -1,9 +1,16 @@
 """WhatsApp webhook endpoints."""
 
 import logging
+
+import httpx
 from fastapi import APIRouter, Request, Response, Query, HTTPException
 
 from app.core.config import settings
+from app.core.constants import (
+    WHATSAPP_API_BASE_URL,
+    WHATSAPP_API_VERSION,
+    WHATSAPP_MESSAGING_PRODUCT,
+)
 from app.services.llm import llm_service
 
 logger = logging.getLogger(__name__)
@@ -115,9 +122,7 @@ async def send_text_message(to_number: str, text: str) -> None:
         to_number: Recipient phone number
         text: Message text
     """
-    import httpx
-
-    url = f"https://graph.facebook.com/v21.0/{settings.whatsapp_phone_number_id}/messages"
+    url = f"{WHATSAPP_API_BASE_URL}/{WHATSAPP_API_VERSION}/{settings.whatsapp_phone_number_id}/messages"
 
     headers = {
         "Authorization": f"Bearer {settings.whatsapp_access_token}",
@@ -125,7 +130,7 @@ async def send_text_message(to_number: str, text: str) -> None:
     }
 
     payload = {
-        "messaging_product": "whatsapp",
+        "messaging_product": WHATSAPP_MESSAGING_PRODUCT,
         "to": to_number,
         "type": "text",
         "text": {"body": text},
