@@ -11,15 +11,16 @@ MVP conversational agent to help with meal planning and grocery shopping organiz
 F1.1: Generate weekly meal plan
 F1.2: Generate shopping list from validated meal plan
 F1.3: Import recipes automatically from screenshots/photo
-F1.4: Import shopping tickets photo or drive sreenshots for shopping list management
+F1.4: Import shopping tickets photo or drive screenshots for shopping list management
 
 # Coding Rules
-- Python 3.12+ as primary language
+- Python 3.13+ as primary language
 - Use `uv` for dependency management
 - English for everything: code, comments, docs, commits, variable names
 - Type hints required for all functions
 - Follow PEP 8 style guide
-- Write tests for critical paths (meal generation, shopping list logic)
+- Write tests with pytest for all critical paths
+- Mock external APIs in tests (OpenRouter, WhatsApp)
 
 
 # Architecture
@@ -27,9 +28,9 @@ F1.4: Import shopping tickets photo or drive sreenshots for shopping list manage
 ```mermaid
 flowchart TB
     phone["📱 WhatsApp"] -->|webhook| api["⚙️ FastAPI<br/>(Railway)"]
-    api -->|prompt + contexte| llm["🧠 Claude API<br/>(Sonnet 4)"]
-    llm -->|réponse| api
-    api -->|read/write| db["🗄️ Neon PostgreSQL<br/>(users, recettes,<br/>plannings, feedback)"]
+    api -->|prompt + context| llm["🧠 LLM via OpenRouter<br/>(Qwen 3.5 Plus)"]
+    llm -->|response| api
+    api -->|read/write| db["🗄️ Neon PostgreSQL<br/>(users, recipes,<br/>meal plans, feedback)"]
     api -->|message| phone
 ```
 
@@ -42,39 +43,88 @@ flowchart TB
 
 **Authentication**: Start simple with WhatsApp phone number as user ID. Auth0 or Supabase Auth for LOT2 if needed.
 
-**LLM**: LLM from OpenRouter (will tests different models to choose the most appropriate)
+**LLM**: Qwen 3.5 Plus via OpenRouter (cost-effective, reasoning enabled). Can switch models easily via constants.py.
 
-**Hosting**: Railway.app (affordable for MVP, easy deployment).
+**Hosting**: Railway.app (affordable for MVP, easy deployment, auto-deploy from GitHub).
 
 **Supermarket integration**: Deferred to LOT2. Will use Playwright for web automation when ready.
 
 ## Tech Stack Summary
-- **Language**: Python 3.12+
-- **Web framework**: FastAPI
+- **Language**: Python 3.13
+- **Web framework**: FastAPI 0.129+
 - **Dependency manager**: uv
-- **Database**: Neon PostgreSQL + SQLAlchemy ORM
-- **LLM**: OpenRouter API
+- **Database**: Neon PostgreSQL + SQLAlchemy ORM (Week 3)
+- **LLM**: OpenRouter API (Qwen 3.5 Plus with reasoning)
 - **Messaging**: Meta WhatsApp Cloud API
-- **Hosting**: Railway
-- **Testing**: pytest
+- **Hosting**: Railway (auto-deploy from GitHub)
+- **Testing**: pytest with pytest-asyncio and pytest-mock
+
+## Project Structure
+```
+botatouille/
+├── app/
+│   ├── api/          # API routes (webhook endpoints)
+│   ├── core/         # Config, constants, settings
+│   ├── models/       # Data models (Pydantic, SQLAlchemy)
+│   └── services/     # Business logic (LLM service)
+├── tests/            # pytest unit and integration tests
+├── examples/         # Demo scripts for manual testing
+├── docs/             # Additional documentation
+├── main.py           # Application entry point
+├── railway.json      # Railway deployment config
+└── pyproject.toml    # Project dependencies and config
+```
 
 ## Environment Variables
 ```bash
 # Required for MVP
-OPENROUTER_API_KEY=sk-...
+OPENROUTER_API_KEY=sk-or-v1-...
 WHATSAPP_VERIFY_TOKEN=your_random_token
 WHATSAPP_ACCESS_TOKEN=your_meta_token
 WHATSAPP_PHONE_NUMBER_ID=your_phone_id
+
+# Database (Week 3+)
 DATABASE_URL=postgresql://...
 
 # Optional
-LOG_LEVEL=INFO
-ENVIRONMENT=development
+LOG_LEVEL=INFO          # Use DEBUG for local development
+ENVIRONMENT=production   # development, staging, production
+OPENROUTER_APP_NAME=Botatouille
+OPENROUTER_SITE_URL=https://github.com/mazelx/botatouille
 ```
 
+## Testing
+
+### Run tests
+```bash
+# All tests
+uv run pytest
+
+# Unit tests only (fast, mocked)
+uv run pytest -m unit
+
+# Integration tests
+uv run pytest -m integration
+
+# With coverage
+uv run pytest --cov=app --cov-report=html
+```
+
+### Test structure
+- **tests/test_llm_service.py**: Unit tests for LLM service (6 tests)
+- **tests/test_webhook_api.py**: Integration tests for webhook (9 tests)
+- **tests/conftest.py**: Shared fixtures (client, llm_service, mock data)
+- **examples/**: Manual testing scripts (demo_llm.py, demo_webhook.py)
+
+### Test coverage
+✅ LLM chat completion (success, error handling, custom params)
+✅ Meal plan generation
+✅ Webhook verification (success, wrong token, wrong mode)
+✅ Message handling (text, image, status updates)
+✅ Error scenarios (LLM failures, invalid payloads)
 
 
-## Conversational Flow with Tool Use
+## Conversational Flow with Tool Use (Week 4)
 
 OpenRouter API tools for structured actions (using OpenAI tool format):
 
@@ -246,17 +296,22 @@ Tuesday
 
 # MVP Roadmap
 
-## Week 1: Foundation
-- [ ] FastAPI project structure with uv
-- [ ] Environment setup (.env, python-dotenv)
-- [ ] WhatsApp webhook endpoint (verify + message receive)
-- [ ] OpenRouter API integration for basic conversation
-- [ ] Handle text messages and simple responses
-- [ ] Deploy to Railway
-- [ ] Test with single user (you)
-- **Deliverable**: Bot responds to WhatsApp messages and can generate a basic meal plan text
+## ✅ Week 1: Foundation (COMPLETED)
+- [x] FastAPI project structure with uv
+- [x] Environment setup (.env, python-dotenv)
+- [x] WhatsApp webhook endpoint (verify + message receive)
+- [x] OpenRouter API integration for basic conversation
+- [x] Handle text messages and simple responses
+- [x] Deploy to Railway with auto-deploy from GitHub
+- [x] Test with WhatsApp messages
+- [x] Pytest test suite (15 tests: unit + integration)
+- [x] Switch to Qwen 3.5 Plus model (cost-effective)
+- [ ] Route message to "tools" (plan meals, send recipe)
+- **Status**: ✅ Bot live on Railway, responds to WhatsApp messages with AI-generated meal suggestions
 
-## Week 2: Vision Features (F1.3 & F1.4)
+**Live deployment**: https://botatouille-production.up.railway.app
+
+## Week 2: Vision Features (F1.3 & F1.4) - IN PROGRESS
 - [ ] WhatsApp media handling (receive photos/images)
 - [ ] OpenRouter vision model integration (GPT-4 Vision or Claude 3.5 Sonnet)
 - [ ] Recipe extraction from photo/screenshot (F1.3)
@@ -297,7 +352,7 @@ Tuesday
 - [ ] Open to 5-10 friends/family
 - **Deliverable**: Production-ready MVP with real users
 
-## Database Schema (Draft)
+## Database Schema (Draft - Week 3)
 
 ```sql
 -- Users
@@ -339,9 +394,59 @@ shopping_lists (
 )
 ```
 
+# Current Status (Week 1 Complete)
+
+## ✅ What's Working
+- FastAPI server running on Railway
+- WhatsApp webhook verified and operational
+- Text message handling with LLM responses
+- OpenRouter integration with Qwen 3.5 Plus model
+- Intelligent meal planning conversations
+- Auto-deployment from GitHub
+- Comprehensive test suite (15 tests passing)
+
+## 📊 Technical Metrics
+- Response time: ~2-5 seconds per message
+- Model: Qwen 3.5 Plus with reasoning enabled
+- Test coverage: 15 unit + integration tests
+- Code quality: Type hints, PEP 8, shared fixtures
+- Deployment: Automatic via Railway on git push
+
+## 🔜 Next Steps (Week 2)
+1. Add vision model support for image processing
+2. Implement recipe extraction from photos (F1.3)
+3. Add shopping ticket OCR (F1.4)
+4. Test with multiple images in conversation flow
+
 # Links & Resources
 
+- **Live Bot**: https://botatouille-production.up.railway.app
+- **GitHub**: https://github.com/mazelx/botatouille
+- **Railway Dashboard**: https://railway.app/project/5f6538c3-0e39-4497-8bcd-71bae59c9a82
 - [Meta WhatsApp Cloud API Docs](https://developers.facebook.com/docs/whatsapp/cloud-api)
-- [Anthropic Claude API](https://docs.anthropic.com/)
+- [OpenRouter API Docs](https://openrouter.ai/docs)
 - [Railway Docs](https://docs.railway.app/)
 - [Neon PostgreSQL](https://neon.tech/docs)
+
+# Development Commands
+
+```bash
+# Local development
+uv run python main.py
+
+# Run tests
+uv run pytest
+uv run pytest -v              # verbose
+uv run pytest -m unit         # unit tests only
+uv run pytest -m integration  # integration tests only
+
+# Manual testing
+uv run python examples/demo_llm.py
+uv run python examples/demo_webhook.py
+
+# Deploy to Railway
+git push  # auto-deploys via Railway
+
+# Check Railway logs
+railway logs --tail
+```
